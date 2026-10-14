@@ -65,6 +65,20 @@
   <input id="model" type="text" placeholder="e.g. gpt-4o-mini" autocomplete="off" spellcheck="false">
   <div class="hint">Leave empty to use the default for the selected provider.</div>
 
+  <h2 style="margin: 22px 0 0; font-size: 16px;">Sandbox server</h2>
+  <p class="sub" style="margin-bottom: 0;">Where repos actually run. Deploy the sandbox on your own server (see its README), then paste the URL + token here.</p>
+
+  <label for="sandboxUrl">Sandbox URL</label>
+  <input id="sandboxUrl" type="text" placeholder="http://your-server:4730" autocomplete="off" spellcheck="false">
+  <div class="hint">No token needed for the health check; the token is required to run repos.</div>
+
+  <label for="sandboxToken">Sandbox token</label>
+  <input id="sandboxToken" type="password" placeholder="paste SANDBOX_TOKEN" autocomplete="off" spellcheck="false">
+
+  <label for="previewPort">Preview port</label>
+  <input id="previewPort" type="text" placeholder="3000" autocomplete="off" spellcheck="false" inputmode="numeric">
+  <div class="hint">App port "Run + Preview" exposes through the tunnel. Most Node apps use 3000.</div>
+
   <div class="btnrow">
     <button id="saveBtn">Save</button>
     <button id="testBtn">Test connection</button>

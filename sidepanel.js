@@ -33,7 +33,8 @@ function init() {
   $('tabReadme').addEventListener('click', () => switchTab('readme'));
   $('settingsBtn').addEventListener('click', () => Env.openOptions());
   $('fileViewClose').addEventListener('click', () => $('fileView').classList.add('hidden'));
-  $('runBtn').addEventListener('click', onRunRepo);
+  $('runBtn').addEventListener('click', () => onRunRepo({ preview: false }));
+  $('previewRunBtn').addEventListener('click', () => onRunRepo({ preview: true }));
   $('sendBtn').addEventListener('click', onSendChat);
   $('chatInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onSendChat();
@@ -112,8 +113,11 @@ function renderRepo(data) {
   $('fileView').classList.add('hidden');
   $('readmeContent').textContent = data.readme || 'No README found in this repo.';
   $('runBtn').disabled = false;
+  $('previewRunBtn').disabled = false;
   $('runOutput').classList.add('hidden');
   $('runOutput').textContent = '';
+  $('previewBtn').classList.add('hidden');
+  $('previewBtn').onclick = null;
 }
 
 /* ---------------- file tree ---------------- */
@@ -203,30 +207,42 @@ async function onOpenFile(path) {
   }
 }
 
-/* ---------------- run repo (stubbed in v1) ---------------- */
+/* ---------------- run repo (sandbox-wired) ---------------- */
 
-async function onRunRepo() {
+async function onRunRepo({ preview = false } = {}) {
   if (!currentRepo) return;
   const out = $('runOutput');
+  const btn = preview ? $('previewRunBtn') : $('runBtn');
   out.classList.remove('hidden');
-  out.textContent = 'Preparing…';
+  out.textContent = preview ? 'Starting app + opening tunnel…' : 'Preparing…';
   $('runBtn').disabled = true;
-  $('runBtn').classList.add('busy');
+  $('previewRunBtn').disabled = true;
+  btn.classList.add('busy');
+  $('previewBtn').classList.add('hidden');
+  $('previewBtn').onclick = null;
   try {
-    // The UI depends only on the runRepo() contract — swapping the stub
-    // for a real runner later needs zero changes here.
     const result = await runRepo({
       owner: currentRepo.owner,
       repo: currentRepo.repo,
       branch: currentRepo.branch,
-      tree: currentRepo.tree
+      tree: currentRepo.tree,
+      preview
     });
     out.textContent = (result.logs || []).join('\n');
+    // Preview URL available -> show the "open in new tab" button.
+    // window.open here is inside the original click gesture, so no popup block.
+    if (result.previewUrl) {
+      const url = result.previewUrl;
+      const pbtn = $('previewBtn');
+      pbtn.classList.remove('hidden');
+      pbtn.onclick = () => window.open(url, '_blank', 'noopener');
+    }
   } catch (err) {
     out.textContent = 'Runner error: ' + ((err && err.message) || err);
   } finally {
     $('runBtn').disabled = false;
-    $('runBtn').classList.remove('busy');
+    $('previewRunBtn').disabled = false;
+    btn.classList.remove('busy');
   }
 }
 
